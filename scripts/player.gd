@@ -223,12 +223,19 @@ func _build_tag(color: Color) -> void:
 	label.render_priority = 1
 
 
+var _breath_file := false
+
 func _build_breath() -> void:
 	_breath_player = AudioStreamPlayer3D.new()
-	_breath_gen = AudioStreamGenerator.new()
-	_breath_gen.mix_rate = 22050
-	_breath_gen.buffer_length = 0.25
-	_breath_player.stream = _breath_gen
+	var real := Sfx.breath_stream()
+	if real:
+		_breath_file = true
+		_breath_player.stream = real
+	else:
+		_breath_gen = AudioStreamGenerator.new()
+		_breath_gen.mix_rate = 22050
+		_breath_gen.buffer_length = 0.25
+		_breath_player.stream = _breath_gen
 	_breath_player.position.y = 1.5
 	_breath_player.unit_size = 2.0
 	_breath_player.max_distance = 14.0
@@ -842,6 +849,11 @@ func _breath_audio(delta: float) -> void:
 	if has_flag(F.HOLDING):
 		loud = -80.0
 	_breath_player.volume_db = lerpf(_breath_player.volume_db, loud, delta * 3.0)
+	if _breath_file:
+		_breath_player.pitch_scale = lerpf(_breath_player.pitch_scale, clampf(_breath_rate / 0.28, 0.9, 2.2), delta)
+		if not _breath_player.playing:
+			_breath_player.play()
+		return
 	var pb: AudioStreamGeneratorPlayback = _breath_player.get_stream_playback()
 	if pb == null:
 		return

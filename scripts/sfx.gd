@@ -2,6 +2,11 @@ extends Node
 ## Sound autoload. Hooks UI buttons automatically and plays gameplay
 ## events from Game.fx. All clips are Kenney (CC0).
 
+## Drop-in sound files (see CREDITS.md). When present they replace the
+## built-in versions: breath.ogg (loop), siren.ogg (loop), tag.ogg.
+const BREATH_FILE := "res://assets/audio/sfx/breath.ogg"
+const SIREN_FILE := "res://assets/audio/sfx/siren.ogg"
+const TAG_FILE := "res://assets/audio/sfx/tag.ogg"
 const UI := "res://assets/audio/ui/"
 const SFX := "res://assets/audio/sfx/"
 
@@ -50,6 +55,8 @@ func _ready() -> void:
 			if st:
 				arr.append(st)
 		_streams[k] = arr
+	if ResourceLoader.exists(TAG_FILE):
+		_streams["tag"] = [load(TAG_FILE)]
 	for i in 6:
 		var p := AudioStreamPlayer.new()
 		p.bus = "Master"
@@ -124,15 +131,22 @@ var _siren_phase := 0.0
 func siren(seconds: float) -> void:
 	if _siren == null:
 		_siren = AudioStreamPlayer.new()
-		_siren_gen = AudioStreamGenerator.new()
-		_siren_gen.mix_rate = 22050
-		_siren_gen.buffer_length = 0.2
-		_siren.stream = _siren_gen
+		if ResourceLoader.exists(SIREN_FILE):
+			_siren.stream = load(SIREN_FILE)
+		else:
+			_siren_gen = AudioStreamGenerator.new()
+			_siren_gen.mix_rate = 22050
+			_siren_gen.buffer_length = 0.2
+			_siren.stream = _siren_gen
 		_siren.volume_db = -10.0
 		add_child(_siren)
 	_siren_t = seconds
 	if not _siren.playing:
 		_siren.play()
+
+
+static func breath_stream() -> AudioStream:
+	return load(BREATH_FILE) if ResourceLoader.exists(BREATH_FILE) else null
 
 
 func _siren_fill(delta: float) -> void:
@@ -141,6 +155,8 @@ func _siren_fill(delta: float) -> void:
 			_siren.stop()
 		return
 	_siren_t -= delta
+	if _siren_gen == null:
+		return # real siren file is playing
 	var pb: AudioStreamGeneratorPlayback = _siren.get_stream_playback()
 	if pb == null:
 		return
