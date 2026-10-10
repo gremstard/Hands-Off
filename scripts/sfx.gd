@@ -3,10 +3,10 @@ extends Node
 ## events from Game.fx. All clips are Kenney (CC0).
 
 ## Drop-in sound files (see CREDITS.md). When present they replace the
-## built-in versions: breath.ogg (loop), siren.ogg (loop), tag.ogg.
-const BREATH_FILE := "res://assets/audio/sfx/breath.ogg"
-const SIREN_FILE := "res://assets/audio/sfx/siren.ogg"
-const TAG_FILE := "res://assets/audio/sfx/tag.ogg"
+## built-in versions: breath.wav (loop), siren.wav (loop), tag.wav.
+const BREATH_FILE := "res://assets/audio/sfx/breath.wav"
+const SIREN_FILE := "res://assets/audio/sfx/siren.wav"
+const TAG_FILE := "res://assets/audio/sfx/tag.wav"
 const UI := "res://assets/audio/ui/"
 const SFX := "res://assets/audio/sfx/"
 
