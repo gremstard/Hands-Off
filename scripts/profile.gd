@@ -11,6 +11,9 @@ var costume := ""
 
 
 func _ready() -> void:
+	var icon: Texture2D = load("res://icon.png")
+	if icon:
+		DisplayServer.set_icon(icon.get_image())
 	load_profile()
 	Net.player_name = player_name
 	Net.skin = skin
