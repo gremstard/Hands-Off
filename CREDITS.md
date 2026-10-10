@@ -1,9 +1,9 @@
 # Credits
 
 ## Sounds
-- Breathing: swifty433, https://freesound.org/people/swifty433/ (attribution required)
-- Siren: FiveBrosStopMosYT, https://freesound.org/people/FiveBrosStopMosYT/
-- Tag: MessyAcousticApocalypse666, https://freesound.org/people/MessyAcousticApocalypse666/ (non-commercial: replace before any paid release)
+- Breathing ("heavybreath-03"): swifty433, https://freesound.org/people/swifty433/ (attribution required)
+- Siren ("facility breach siren 1"): FiveBrosStopMosYT, https://freesound.org/people/FiveBrosStopMosYT/
+- Tag ("slap"): MessyAcousticApocalypse666, https://freesound.org/people/MessyAcousticApocalypse666/ (non-commercial: replace before any paid release)
 - UI, footsteps, impacts: Kenney, https://kenney.nl (CC0)
 
 ## Animations and rig
