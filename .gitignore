@@ -1,0 +1,8 @@
+.godot/
+.DS_Store
+zip assets/
+builds/
+*.fbx
+*.blend
+*.blend1
+assets/characters/unrigged/
