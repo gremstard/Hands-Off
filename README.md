@@ -168,4 +168,4 @@ produced zips as the preset's custom release template. Then:
 ```bash
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . --export-release "macOS Universal"
 ```
-Outputs land in `builds/`. macOS builds are ad-hoc signed only (right-click, Open on first launch).
+Outputs land in `builds/`. Windows exe icons: `python3 tools/win_icon.py builds/win-x86_64/HandsOff.exe assets/icon/icon1024.png assets/icon/icon256.png` (patches the exe in place, no rcedit). macOS builds are ad-hoc signed only (right-click, Open on first launch).

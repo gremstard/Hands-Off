@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dyf4hi6nkkgo"
 path.s3tc="res://.godot/imported/brown_Gradient Pallete.png-a01e7a0db00f7280c3638044314f088c.s3tc.ctex"
-path.etc2="res://.godot/imported/brown_Gradient Pallete.png-a01e7a0db00f7280c3638044314f088c.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/brown_Gradient Pallete.png"
-dest_files=["res://.godot/imported/brown_Gradient Pallete.png-a01e7a0db00f7280c3638044314f088c.s3tc.ctex", "res://.godot/imported/brown_Gradient Pallete.png-a01e7a0db00f7280c3638044314f088c.etc2.ctex"]
+dest_files=["res://.godot/imported/brown_Gradient Pallete.png-a01e7a0db00f7280c3638044314f088c.s3tc.ctex"]
 
 [params]
 
