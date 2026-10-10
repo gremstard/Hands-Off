@@ -91,6 +91,16 @@ the jail, the Hander spawn, Runner spawns and torches. **Save .hom** writes `use
 and the file is sent to every client at round start, so only the host needs it. The built-in map is
 `assets/maps/blockyard.hom`, regenerated with `tools/export_default_map.gd`.
 
+## Maps from Blender
+
+Model at 1 unit = 1 m. `assets/maps/_reference.glb` has Hany at game height (1.8 m), a 2 m block and a 1 m cube.
+Export the map as GLB (+Y up, apply transforms) into `assets/maps/`; it shows up in the lobby map list. Every
+mesh gets collision. Add empties named `JailCenter`, `HanderSpawn`, `RunnerSpawn1..n`, `Torch1..n`. Material or
+object names containing grass, wood, metal, dirt or sand set the footstep sound. Files starting with `_` are ignored.
+
+Movement numbers for layout: jump reaches about 1.1 m, climb grabs ledges between 0.85 and 1.35 m, stairs up to
+0.55 m per step are walked, cells are 2 m, Hany needs a 1 m gap to pass.
+
 ## Building the map out of blocks
 
 The arena loads [scenes/maps/main.tscn](scenes/maps/main.tscn) (a starter layout) and falls back to the code greybox if that

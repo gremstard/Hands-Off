@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dyrck0kf5xxiy"
 path.s3tc="res://.godot/imported/skyblue_Gradient Pallete.png-1af2b383cd23d002f37518b556b5c432.s3tc.ctex"
+path.etc2="res://.godot/imported/skyblue_Gradient Pallete.png-1af2b383cd23d002f37518b556b5c432.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/characters/skyblue_Gradient Pallete.png"
-dest_files=["res://.godot/imported/skyblue_Gradient Pallete.png-1af2b383cd23d002f37518b556b5c432.s3tc.ctex"]
+dest_files=["res://.godot/imported/skyblue_Gradient Pallete.png-1af2b383cd23d002f37518b556b5c432.s3tc.ctex", "res://.godot/imported/skyblue_Gradient Pallete.png-1af2b383cd23d002f37518b556b5c432.etc2.ctex"]
 
 [params]
 

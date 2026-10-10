@@ -43,13 +43,65 @@ var _jail: Vector3 = JAIL_CENTER
 
 func _ready() -> void:
 	_build_environment()
-	var data: MapData = Game.current_map()
-	if data:
-		_build_map(data)
+	if Game.map_path.ends_with(".glb"):
+		_build_glb_map(Game.map_path)
 	else:
-		_build_geometry()
+		var data: MapData = Game.current_map()
+		if data:
+			_build_map(data)
+		else:
+			_build_geometry()
 	add_child(HUD_SCENE.new())
 	Game.arena_ready(self)
+
+
+## A map modelled in Blender: every mesh gets collision, markers come from
+## empties named JailCenter, HanderSpawn, RunnerSpawn*, Torch*.
+## Surface for footsteps from the material name (grass, wood, metal, dirt).
+func _build_glb_map(path: String) -> void:
+	var scene: PackedScene = load(path)
+	if scene == null:
+		_build_geometry()
+		return
+	_map = scene.instantiate()
+	_map.name = "Map"
+	add_child(_map)
+	Toon.convert_scene(_map, Toon.DEFAULT_OUTLINE, 0.02)
+	for n in _map.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = n
+		if mi.get_parent() is StaticBody3D or mi.mesh == null:
+			continue
+		var body := StaticBody3D.new()
+		var cs := CollisionShape3D.new()
+		cs.shape = mi.mesh.create_trimesh_shape()
+		body.add_child(cs)
+		var mat_name := ""
+		if mi.mesh.get_surface_count() > 0 and mi.get_active_material(0):
+			mat_name = mi.get_active_material(0).resource_name.to_lower()
+		var surface := "concrete"
+		for k in ["grass", "wood", "metal", "dirt", "sand"]:
+			if k in mat_name or k in mi.name.to_lower():
+				surface = "dirt" if k == "sand" else k
+		body.set_meta("surface", surface)
+		mi.add_child(body)
+	for n in _map.find_children("*", "Node3D", true, false):
+		var nm: String = n.name
+		if nm.begins_with("RunnerSpawn"):
+			_hider_spawns.append(n.global_position)
+		elif nm.begins_with("HanderSpawn"):
+			_seeker_pos = n.global_position
+		elif nm.begins_with("JailCenter") or nm == "Jail":
+			_jail = n.global_position
+		elif nm.begins_with("Torch"):
+			_fire(n.global_position)
+	var jail_label := Label3D.new()
+	jail_label.text = "JAIL"
+	jail_label.position = _jail + Vector3(0, 4, 0)
+	jail_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	jail_label.font_size = 96
+	jail_label.pixel_size = 0.01
+	jail_label.modulate = Color(1, 0.4, 0.4)
+	add_child(jail_label)
 
 
 func _build_map(data: MapData) -> void:

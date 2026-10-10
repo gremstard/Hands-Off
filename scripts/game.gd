@@ -213,6 +213,11 @@ func set_map(path: String) -> void:
 	if not _is_server() or phase != Phase.LOBBY:
 		return
 	map_path = path
+	if path.ends_with(".glb"):
+		map_json = ""
+		_map_cache = null
+		sync_map_name.rpc(path.get_file().get_basename())
+		return
 	var m: MapData = MapData.load_file(path) if path != "" else null
 	map_json = m.to_json() if m else ""
 	_map_cache = null
@@ -328,7 +333,7 @@ func _start_round() -> void:
 	_immune_until.clear()
 	_spawned = false
 	last_winners = []
-	load_arena.rpc(mode, p, map_json)
+	load_arena.rpc(mode, p, map_json, map_path if map_path.ends_with(".glb") else "")
 
 
 ## Server: someone connected while a round is running. They join as a
@@ -341,14 +346,15 @@ func add_spectator(id: int, pname: String, skin: String) -> void:
 		"status": Status.OUT, "spectator": true, "wins": wins_of(pname)}
 	sync_players.rpc(players)
 	sync_wins.rpc_id(id, wins)
-	load_arena.rpc_id(id, mode, players, map_json)
+	load_arena.rpc_id(id, mode, players, map_json, map_path if map_path.ends_with(".glb") else "")
 	# load_arena resets their phase to HEADSTART; the real phase follows once
 	# they report the arena ready (see _peer_ready).
 
 
 @rpc("authority", "call_local", "reliable")
-func load_arena(m: int, p: Dictionary, mjson: String = "") -> void:
+func load_arena(m: int, p: Dictionary, mjson: String = "", glb: String = "") -> void:
 	map_json = mjson
+	map_path = glb
 	_map_cache = null
 	mode = m as Mode
 	rules = make_rules(m)

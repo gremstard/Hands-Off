@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bcvualx7b1t6u"
 path.s3tc="res://.godot/imported/watermelon_Gradient Pallete.png-457e8910fafa25ca8d707ad2af825246.s3tc.ctex"
+path.etc2="res://.godot/imported/watermelon_Gradient Pallete.png-457e8910fafa25ca8d707ad2af825246.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/characters/watermelon_Gradient Pallete.png"
-dest_files=["res://.godot/imported/watermelon_Gradient Pallete.png-457e8910fafa25ca8d707ad2af825246.s3tc.ctex"]
+dest_files=["res://.godot/imported/watermelon_Gradient Pallete.png-457e8910fafa25ca8d707ad2af825246.s3tc.ctex", "res://.godot/imported/watermelon_Gradient Pallete.png-457e8910fafa25ca8d707ad2af825246.etc2.ctex"]
 
 [params]
 

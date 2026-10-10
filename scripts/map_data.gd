@@ -62,6 +62,13 @@ static func list_maps() -> Array[Dictionary]:
 		for f in d.get_files():
 			if f.ends_with(EXT):
 				out.append({"name": f.trim_suffix(EXT), "path": dir + "/" + f, "builtin": dir == BUILTIN_DIR})
+			elif dir == BUILTIN_DIR and (f.ends_with(".glb") or f.ends_with(".glb.import") or f.ends_with(".glb.remap")):
+				var base := f.get_basename().get_basename() if not f.ends_with(".glb") else f.get_basename()
+				if base.begins_with("_"):
+					continue # reference files
+				var entry := {"name": base, "path": dir + "/" + base + ".glb", "builtin": true}
+				if not out.any(func(e): return e.path == entry.path):
+					out.append(entry)
 	return out
 
 

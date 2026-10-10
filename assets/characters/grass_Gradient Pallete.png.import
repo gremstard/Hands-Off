@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c26ys0v1o5j36"
 path.s3tc="res://.godot/imported/grass_Gradient Pallete.png-ce6269258a6a5414cc7cebd7769ebe95.s3tc.ctex"
+path.etc2="res://.godot/imported/grass_Gradient Pallete.png-ce6269258a6a5414cc7cebd7769ebe95.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/characters/grass_Gradient Pallete.png"
-dest_files=["res://.godot/imported/grass_Gradient Pallete.png-ce6269258a6a5414cc7cebd7769ebe95.s3tc.ctex"]
+dest_files=["res://.godot/imported/grass_Gradient Pallete.png-ce6269258a6a5414cc7cebd7769ebe95.s3tc.ctex", "res://.godot/imported/grass_Gradient Pallete.png-ce6269258a6a5414cc7cebd7769ebe95.etc2.ctex"]
 
 [params]
 
