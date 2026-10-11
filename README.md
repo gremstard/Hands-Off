@@ -101,6 +101,13 @@ object names containing grass, wood, metal, dirt or sand set the footstep sound.
 Movement numbers for layout: jump reaches about 1.1 m, climb grabs ledges between 0.85 and 1.35 m, stairs up to
 0.55 m per step are walked, cells are 2 m, Hany needs a 1 m gap to pass.
 
+## Kit builder
+
+Main menu, **Kit builder**: a thumbnail browser of every kit piece by category, the real model as a ghost under the
+cursor, grid snap (G cycles 0.5/1/2/4 m, Shift for free placement) and face snapping so pieces butt against walls and
+stack on tops. R rotates, `[` `]` step through the category, X removes. Saves the same `.hom` files. Thumbnails are
+generated with `Godot --path . res://tools/kit_thumbs.tscn` (needs a window).
+
 ## Prop kits
 
 GLB model packs live under `assets/kits/<kit>/` and appear in the map editor's Prop tool (category, model, scale).

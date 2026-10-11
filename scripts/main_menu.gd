@@ -117,6 +117,11 @@ func _ready() -> void:
 	editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	editor.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/map_editor.tscn"))
 	tools_row.add_child(editor)
+	var kit := Button.new()
+	kit.text = "Kit builder"
+	kit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	kit.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/kit_builder.tscn"))
+	tools_row.add_child(kit)
 	var settings := Button.new()
 	settings.text = "Settings"
 	settings.size_flags_horizontal = Control.SIZE_EXPAND_FILL

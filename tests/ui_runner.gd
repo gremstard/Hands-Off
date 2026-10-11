@@ -43,5 +43,16 @@ func _run() -> void:
 	if back.blocks.size() != before + 1:
 		printerr("FAIL map roundtrip")
 		get_tree().quit(1)
+	get_tree().change_scene_to_file("res://scenes/kit_builder.tscn")
+	for i in 10: await get_tree().process_frame
+	var kb = get_tree().current_scene
+	var nb: int = kb.map.props.size()
+	kb._cursor_valid = true
+	kb._cursor_pos = Vector3(8, 0, 8)
+	kb._act()
+	print("kit builder: cats=%d thumbs=%d props %d -> %d piece=%s" % [kb._cats.size(), kb._thumb_grid.get_child_count(), nb, kb.map.props.size(), kb.prop_path.get_file()])
+	if kb.map.props.size() != nb + 1:
+		printerr("FAIL kit builder place")
+		get_tree().quit(1)
 	print("UI OK")
 	get_tree().quit(0)
