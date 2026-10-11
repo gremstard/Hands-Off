@@ -20,6 +20,10 @@ var name := "Untitled"
 var blocks: Array = []
 ## [{k: kind, p: [x,y,z]}]
 var markers: Array = []
+## [{m: res path of a .glb, p: [x,y,z], ry: radians, s: scale}]
+var props: Array = []
+
+const KIT_DIR := "res://assets/kits"
 
 
 static func from_json(text: String) -> MapData:
@@ -29,11 +33,12 @@ static func from_json(text: String) -> MapData:
 		m.name = str(d.get("name", "Untitled"))
 		m.blocks = d.get("blocks", [])
 		m.markers = d.get("markers", [])
+		m.props = d.get("props", [])
 	return m
 
 
 func to_json() -> String:
-	return JSON.stringify({"format": "hom", "version": VERSION, "name": name, "blocks": blocks, "markers": markers}, "\t")
+	return JSON.stringify({"format": "hom", "version": VERSION, "name": name, "blocks": blocks, "markers": markers, "props": props}, "\t")
 
 
 static func load_file(path: String) -> MapData:
@@ -87,6 +92,69 @@ func add_block(shape: int, block: String, pos: Vector3, ry: float = 0.0, cells: 
 	return e
 
 
+func add_prop(model: String, pos: Vector3, ry: float = 0.0, scale: float = 1.0) -> Dictionary:
+	var e := {"m": model, "p": [pos.x, pos.y, pos.z], "ry": ry, "s": scale}
+	props.append(e)
+	return e
+
+
+## All prop models in the kits folder: [{name, path, category}].
+static func list_props() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	_scan_props(KIT_DIR, out)
+	out.sort_custom(func(a, b): return a.path < b.path)
+	return out
+
+
+static func _scan_props(dir: String, out: Array[Dictionary]) -> void:
+	var d := DirAccess.open(dir)
+	if d == null:
+		return
+	for sub in d.get_directories():
+		if sub != "textures":
+			_scan_props(dir + "/" + sub, out)
+	var seen := {}
+	for f in d.get_files():
+		var base := f
+		for ext in [".glb.import", ".glb.remap", ".glb"]:
+			if base.ends_with(ext):
+				base = base.trim_suffix(ext)
+				break
+		if base == f or seen.has(base):
+			continue
+		seen[base] = true
+		var path := dir + "/" + base + ".glb"
+		var cat := dir.trim_prefix(KIT_DIR + "/")
+		out.append({"name": base, "path": path, "category": cat})
+
+
+## Instance a prop with collision and the toon look. Shared by arena and editor.
+static func make_prop(model: String, scale: float = 1.0) -> Node3D:
+	var scene: PackedScene = load(model)
+	if scene == null:
+		return null
+	var inst: Node3D = scene.instantiate()
+	inst.scale = Vector3.ONE * scale
+	Toon.convert_scene(inst, Toon.DEFAULT_OUTLINE, 0.015)
+	var surface := "concrete"
+	var low := model.to_lower()
+	for k in ["metal", "pipe", "dumpster", "trashcan", "vent", "fence", "wood", "grass"]:
+		if k in low:
+			surface = "wood" if k in ["fence", "wood"] else ("grass" if k == "grass" else "metal")
+			break
+	for n in inst.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = n
+		if mi.mesh == null:
+			continue
+		var body := StaticBody3D.new()
+		var cs := CollisionShape3D.new()
+		cs.shape = mi.mesh.create_trimesh_shape()
+		body.add_child(cs)
+		body.set_meta("surface", surface)
+		mi.add_child(body)
+	return inst
+
+
 func add_marker(kind: String, pos: Vector3) -> void:
 	# single-instance kinds replace
 	if kind == JAIL or kind == HANDER:
@@ -113,6 +181,12 @@ func build(parent: Node3D) -> Dictionary:
 		body.position = vec(b.p)
 		body.rotation.y = float(b.get("ry", 0.0))
 		parent.add_child(body)
+	for pr in props:
+		var inst := make_prop(str(pr.m), float(pr.get("s", 1.0)))
+		if inst:
+			inst.position = vec(pr.p)
+			inst.rotation.y = float(pr.get("ry", 0.0))
+			parent.add_child(inst)
 	for m in markers:
 		var p := vec(m.p)
 		match str(m.k):

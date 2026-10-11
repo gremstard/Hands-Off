@@ -11,8 +11,8 @@ const FAST := 36.0
 const SENS := 0.0025
 const GHOST_COLOR := Color(1, 1, 1, 0.35)
 
-enum Tool { BLOCK, ERASE, JAIL, HANDER, RUNNER, TORCH }
-const TOOL_NAMES := ["Block", "Erase", "Jail zone", "Hander spawn", "Runner spawn", "Torch"]
+enum Tool { BLOCK, ERASE, JAIL, HANDER, RUNNER, TORCH, PROP }
+const TOOL_NAMES := ["Block", "Erase", "Jail", "Hander", "Runner", "Torch", "Prop"]
 const MARKER_COLORS := {"jail": Color(0.9, 0.3, 0.3), "hander": Color(0.3, 0.5, 1.0), "runner": Color(0.3, 0.9, 0.4), "torch": Color(1.0, 0.7, 0.2)}
 
 var map: MapData
@@ -32,6 +32,12 @@ var _looking := false
 var _yaw := 0.0
 var _pitch := -0.4
 var _node_to_entry: Dictionary = {}  # StaticBody3D -> block dict
+var _prop_nodes: Dictionary = {}     # StaticBody3D (any under the prop) -> prop dict
+var _props: Array[Dictionary] = []
+var prop_path := ""
+var prop_scale := 1.0
+var cat_opt: OptionButton
+var prop_opt: OptionButton
 var _marker_nodes: Dictionary = {}   # Node3D -> marker dict
 var _cursor_valid := false
 var _cursor_pos := Vector3.ZERO
@@ -120,6 +126,8 @@ func load_map(m: MapData) -> void:
 		_spawn_block(b)
 	for mk in map.markers:
 		_spawn_marker(mk)
+	for pr in map.props:
+		_spawn_prop(pr)
 	name_edit.text = map.name
 	_status("Loaded '%s': %d blocks, %d zones" % [map.name, map.blocks.size(), map.markers.size()])
 
@@ -138,6 +146,17 @@ func _spawn_block(b: Dictionary) -> StaticBody3D:
 	blocks_root.add_child(body)
 	_node_to_entry[body] = b
 	return body
+
+
+func _spawn_prop(pr: Dictionary) -> void:
+	var inst := MapData.make_prop(str(pr.m), float(pr.get("s", 1.0)))
+	if inst == null:
+		return
+	inst.position = MapData.vec(pr.p)
+	inst.rotation.y = float(pr.get("ry", 0.0))
+	blocks_root.add_child(inst)
+	for b in inst.find_children("*", "StaticBody3D", true, false):
+		_prop_nodes[b] = {"entry": pr, "root": inst}
 
 
 func _spawn_marker(mk: Dictionary) -> void:
@@ -259,6 +278,14 @@ func _update_cursor() -> void:
 		ghost.visible = true
 	elif tool == Tool.ERASE:
 		_cursor_pos = base
+	elif tool == Tool.PROP:
+		# props sit on the surface you point at, free placement on the grid's half steps
+		_cursor_pos = Vector3(roundf(p.x), hit.position.y, roundf(p.z))
+		if prop_path != "":
+			ghost.mesh = BoxMesh.new()
+			ghost.position = _cursor_pos + Vector3(0, 0.5, 0)
+			ghost.rotation.y = rot_steps * PI / 2
+			ghost.visible = true
 	else:
 		_cursor_pos = Vector3(base.x, base.y - 0.5, base.z)
 		ghost.mesh = SphereMesh.new()
@@ -284,6 +311,11 @@ func _act() -> void:
 			_place_marker(MapData.RUNNER)
 		Tool.TORCH:
 			_place_marker(MapData.TORCH)
+		Tool.PROP:
+			if prop_path != "":
+				var e := map.add_prop(prop_path, _cursor_pos, rot_steps * PI / 2, prop_scale)
+				_spawn_prop(e)
+				Sfx.play("ui_click", -6.0)
 
 
 func _place_marker(kind: String) -> void:
@@ -304,6 +336,15 @@ func _erase_under_cursor() -> void:
 		map.blocks.erase(_node_to_entry[_cursor_body])
 		_node_to_entry.erase(_cursor_body)
 		_cursor_body.queue_free()
+		_cursor_body = null
+		Sfx.play("ui_back", -6.0)
+	elif _prop_nodes.has(_cursor_body):
+		var info: Dictionary = _prop_nodes[_cursor_body]
+		map.props.erase(info.entry)
+		for k in _prop_nodes.keys():
+			if _prop_nodes[k].root == info.root:
+				_prop_nodes.erase(k)
+		info.root.queue_free()
 		_cursor_body = null
 		Sfx.play("ui_back", -6.0)
 	elif _marker_nodes.has(_cursor_body):
@@ -366,6 +407,42 @@ func _build_ui() -> void:
 	cx = _spin(row1, "x", 1, 60, 1, func(val: float) -> void: cells.x = int(val))
 	cy = _spin(row1, "y", 1, 20, 1, func(val: float) -> void: cells.y = int(val))
 	cz = _spin(row1, "z", 1, 60, 1, func(val: float) -> void: cells.z = int(val))
+
+	var rowp := HFlowContainer.new()
+	rowp.add_theme_constant_override("separation", 6)
+	v.add_child(rowp)
+	rowp.add_child(_lbl("Prop"))
+	_props = MapData.list_props()
+	cat_opt = OptionButton.new()
+	var cats := []
+	for pr in _props:
+		if not cats.has(pr.category):
+			cats.append(pr.category)
+	for c in cats:
+		cat_opt.add_item(c)
+	cat_opt.custom_minimum_size.x = 200
+	rowp.add_child(cat_opt)
+	prop_opt = OptionButton.new()
+	prop_opt.custom_minimum_size.x = 240
+	rowp.add_child(prop_opt)
+	var fill_props := func(ci: int) -> void:
+		prop_opt.clear()
+		if ci < 0 or cats.is_empty():
+			return
+		for pr in _props:
+			if pr.category == cats[ci]:
+				prop_opt.add_item(pr.name)
+				prop_opt.set_item_metadata(prop_opt.item_count - 1, pr.path)
+		if prop_opt.item_count > 0:
+			prop_opt.select(0)
+			prop_path = prop_opt.get_item_metadata(0)
+	cat_opt.item_selected.connect(fill_props)
+	prop_opt.item_selected.connect(func(i: int) -> void:
+		prop_path = prop_opt.get_item_metadata(i)
+		_set_tool(Tool.PROP))
+	if not cats.is_empty():
+		fill_props.call(0)
+	_spin(rowp, "scale", 1, 400, 100, func(val: float) -> void: prop_scale = val / 100.0)
 
 	var row2 := HFlowContainer.new()
 	row2.add_theme_constant_override("separation", 6)
