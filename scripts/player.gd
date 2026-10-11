@@ -343,9 +343,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Pause.is_open:
 			return
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-	elif event.is_action_pressed("menu"):
-		if not Pause.is_open:
-			Pause.open()
 	elif event.is_action_pressed("tag"):
 		if Pause.is_open:
 			return

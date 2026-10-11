@@ -42,6 +42,9 @@ func load_settings() -> void:
 		return
 	for a in ACTIONS:
 		keys[a] = int(cfg.get_value("keys", a, keys[a]))
+	# older saves had the menu on Escape; Escape is the mouse key now
+	if keys["menu"] == KEY_ESCAPE:
+		keys["menu"] = KEY_TAB
 	talk_toggle = bool(cfg.get_value("options", "talk_toggle", false))
 	mouse_sens = float(cfg.get_value("options", "mouse_sens", 1.0))
 
@@ -76,6 +79,11 @@ func apply() -> void:
 	var orb := InputEventMouseButton.new()
 	orb.button_index = MOUSE_BUTTON_MIDDLE
 	InputMap.action_add_event("orbit", orb)
+	# Tab must reach the game, not hop between UI controls
+	if InputMap.has_action("ui_focus_next"):
+		InputMap.action_erase_events("ui_focus_next")
+	if InputMap.has_action("ui_focus_prev"):
+		InputMap.action_erase_events("ui_focus_prev")
 
 
 func key_name(action: String) -> String:

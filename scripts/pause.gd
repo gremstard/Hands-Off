@@ -64,10 +64,16 @@ func close() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if is_open and event.is_action_pressed("menu"):
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed("menu"):
+		return
+	if Game.arena == null or Game.phase == Game.Phase.LOBBY:
+		return
+	if is_open:
 		close()
-		get_viewport().set_input_as_handled()
+	else:
+		open()
+	get_viewport().set_input_as_handled()
 
 
 func _process(_delta: float) -> void:
