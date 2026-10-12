@@ -6,8 +6,8 @@ extends Node3D
 ##  R              rotate 90 degrees       [ ]                  previous / next shape
 ##  Ctrl+S         save                    Esc                  back to menu
 
-const FLY := 14.0
-const FAST := 36.0
+const FLY := 18.0
+const FAST := 60.0
 const SENS := 0.0025
 const GHOST_COLOR := Color(1, 1, 1, 0.35)
 
@@ -42,6 +42,8 @@ var _marker_nodes: Dictionary = {}   # Node3D -> marker dict
 var _cursor_valid := false
 var _cursor_pos := Vector3.ZERO
 var _cursor_body: Node = null
+var _undo: Array = []
+var _redo: Array = []
 
 # UI
 var ui: CanvasLayer
@@ -221,6 +223,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_S:
 				if event.ctrl_pressed or event.meta_pressed:
 					_save()
+			KEY_Z:
+				if event.ctrl_pressed or event.meta_pressed:
+					if event.shift_pressed:
+						redo()
+					else:
+						undo()
+			KEY_Y:
+				if event.ctrl_pressed or event.meta_pressed:
+					redo()
 			KEY_ESCAPE:
 				if _looking:
 					_looking = false
@@ -293,9 +304,46 @@ func _update_cursor() -> void:
 		ghost.visible = true
 
 
+func _snapshot() -> Dictionary:
+	return {"blocks": map.blocks.duplicate(true), "markers": map.markers.duplicate(true), "props": map.props.duplicate(true)}
+
+
+func _push_undo() -> void:
+	_undo.append(_snapshot())
+	if _undo.size() > 100:
+		_undo.pop_front()
+	_redo.clear()
+
+
+func _restore(snap: Dictionary) -> void:
+	var m := MapData.new()
+	m.name = map.name
+	m.blocks = snap.blocks
+	m.markers = snap.markers
+	m.props = snap.props
+	load_map(m)
+
+
+func undo() -> void:
+	if _undo.is_empty():
+		return
+	_redo.append(_snapshot())
+	_restore(_undo.pop_back())
+	_status("Undo")
+
+
+func redo() -> void:
+	if _redo.is_empty():
+		return
+	_undo.append(_snapshot())
+	_restore(_redo.pop_back())
+	_status("Redo")
+
+
 func _act() -> void:
 	if not _cursor_valid:
 		return
+	_push_undo()
 	match tool:
 		Tool.BLOCK:
 			var e := map.add_block(shape, block_name, _cursor_pos, rot_steps * PI / 2, cells, custom_col, custom_row)
@@ -332,6 +380,7 @@ func _place_marker(kind: String) -> void:
 func _erase_under_cursor() -> void:
 	if _cursor_body == null:
 		return
+	_push_undo()
 	if _node_to_entry.has(_cursor_body):
 		map.blocks.erase(_node_to_entry[_cursor_body])
 		_node_to_entry.erase(_cursor_body)
@@ -473,7 +522,7 @@ func _build_ui() -> void:
 	newb.pressed.connect(func() -> void:
 		var m := MapData.new()
 		m.name = "New map"
-		m.add_block(Blocks.Shape.CUBE, "grass", Vector3(0, -1, 0), 0, Vector3i(36, 1, 36))
+		m.add_block(Blocks.Shape.CUBE, "grass", Vector3(0, -1, 0), 0, Vector3i(120, 1, 120))
 		load_map(m))
 	row2.add_child(newb)
 	var folder := Button.new()
@@ -492,7 +541,7 @@ func _build_ui() -> void:
 	status.modulate = Color(0.85, 0.9, 1.0)
 	v.add_child(status)
 	var help := Label.new()
-	help.text = "WASD + Q/E fly (Shift fast)   hold Right mouse to look   Left click place   X remove   R rotate   [ ] shape   Ctrl+S save   Esc menu"
+	help.text = "WASD + Q/E fly (Shift fast)   hold Right mouse to look   Left click place   X remove   R rotate   [ ] shape   Cmd+Z undo   Shift+Cmd+Z redo   Cmd+S save   Esc menu"
 	help.add_theme_font_size_override("font_size", 12)
 	help.modulate = Color(0.7, 0.7, 0.75)
 	v.add_child(help)

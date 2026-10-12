@@ -142,7 +142,7 @@ func _build_ui() -> void:
 	newb.pressed.connect(func() -> void:
 		var m := MapData.new()
 		m.name = "Kit map"
-		m.add_block(Blocks.Shape.CUBE, "asphalt", Vector3(0, -1, 0), 0, Vector3i(40, 1, 40))
+		m.add_block(Blocks.Shape.CUBE, "asphalt", Vector3(0, -1, 0), 0, Vector3i(120, 1, 120))
 		load_map(m))
 	row2.add_child(newb)
 	var folder := Button.new()
@@ -159,7 +159,7 @@ func _build_ui() -> void:
 	status.add_theme_font_size_override("font_size", 13)
 	v.add_child(status)
 	var help := Label.new()
-	help.text = "WASD Q E fly   right mouse look   click place   X remove   R rotate   [ ] piece   G grid   Shift free   Ctrl+S save"
+	help.text = "WASD Q E fly   right mouse look   click place   X remove   R rotate   [ ] piece   G grid   Shift free   Cmd+Z undo   Shift+Cmd+Z redo   Cmd+S save"
 	help.add_theme_font_size_override("font_size", 12)
 	help.modulate = Color(0.7, 0.7, 0.75)
 	v.add_child(help)

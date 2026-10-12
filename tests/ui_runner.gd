@@ -50,6 +50,13 @@ func _run() -> void:
 	kb._cursor_valid = true
 	kb._cursor_pos = Vector3(8, 0, 8)
 	kb._act()
+	kb.undo()
+	var after_undo: int = kb.map.props.size()
+	kb.redo()
+	print("kit builder undo %d redo %d" % [after_undo, kb.map.props.size()])
+	if after_undo != nb or kb.map.props.size() != nb + 1:
+		printerr("FAIL undo/redo")
+		get_tree().quit(1)
 	print("kit builder: cats=%d thumbs=%d props %d -> %d piece=%s" % [kb._cats.size(), kb._thumb_grid.get_child_count(), nb, kb.map.props.size(), kb.prop_path.get_file()])
 	if kb.map.props.size() != nb + 1:
 		printerr("FAIL kit builder place")
